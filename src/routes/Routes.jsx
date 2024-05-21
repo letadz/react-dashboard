@@ -1,45 +1,46 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "../layout/Layout";
-import { SidebarMenu } from "../utils/SidebarMenu";
+import { SidebarMenu } from "@/components/js/constants/SidebarMenu";
 import { ErrorPage } from "../components/pages";
 
-const renderMainRoutes = (menu) => (
-  <Route
-    key={menu.url}
-    path={menu.url}
-    exact={menu.exact}
-    element={<menu.component />}
-  />
-);
+const renderMainRoute = (menu) => {
+  if (menu.component) {
+    return (
+      <Route
+        key={menu.url}
+        path={menu.url}
+        exact={menu.exact}
+        element={<menu.component />}
+      />
+    );
+  }
+  return;
+};
 
 const renderSubMenuRoutes = (subMenu) =>
-  subMenu.map((subMenuItem, index) => (
+  subMenu.map((subMenuItem) => (
     <Route
-      key={index}
+      key={subMenuItem.url}
       path={subMenuItem.url}
       element={<subMenuItem.component />}
     />
   ));
 
-const RoutesLayout = () => {
-  return (
-    <Router>
-      <Layout>
-        <Routes>
-          {/* Render routes for main menu items */}
-          {SidebarMenu.map(renderMainRoutes)}
+const RoutesLayout = () => (
+  <Router>
+    <Layout>
+      <Routes>
+        {SidebarMenu.map((menu) => renderMainRoute(menu))}
 
-          {/* Render routes for sub-menu items */}
-          {SidebarMenu.map((menu) =>
-            menu.subMenu ? renderSubMenuRoutes(menu.subMenu) : null
-          )}
+        {SidebarMenu.filter((menu) => menu.subMenu).flatMap((menu) =>
+          renderSubMenuRoutes(menu.subMenu)
+        )}
 
-          {/* Fallback route for handling 404 errors */}
-          <Route path="*" element={<ErrorPage />} />
-        </Routes>
-      </Layout>
-    </Router>
-  );
-};
+        {/* Fallback route for handling 404 errors */}
+        <Route path="*" element={<ErrorPage />} />
+      </Routes>
+    </Layout>
+  </Router>
+);
 
 export default RoutesLayout;
